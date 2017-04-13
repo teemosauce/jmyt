@@ -5,7 +5,7 @@ export const HTTP_TYPE = {
 	POST: 'POST',
 	PUT: 'PUT'
 }
-console.log('ggg')
+
 export default async(type = 'GET', url = '', data = {}, method = 'fetch') => {
 	type = type.toUpperCase()
 	url = baseUrl + url
