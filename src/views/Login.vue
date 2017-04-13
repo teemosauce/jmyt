@@ -1,5 +1,5 @@
 <template>
-	<div class="container">
+	<div class="container" v-loading="loading"  element-loading-text="正在登录中...">
 		<div class="login-container">
 			<img src="../assets/logo.png" class="login-logo">
 
@@ -21,7 +21,7 @@
 					<el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox>
 					
 					<el-form-item style="width:100%;">
-				      <el-button type="primary" size="small" style="width:100%;" @click.native.prevent="login" :loading="logining">登录</el-button>
+				      <el-button type="primary" size="small" style="width:100%;" @click.native.prevent="login" :loading="loading">登录</el-button>
 				    </el-form-item>
 				</el-form>
 			</div>
@@ -36,16 +36,22 @@
 </template>
 
 <script>
-import  {mapState} from 'vuex';
+import  {mapState, mapMutations} from 'vuex';
+
+
+
+// import api from '../api'
+
+import { login } from '../api/user'
 
 export default {
 	name: 'User',
 	data() {
 		return {
-			logining:false,
+			loading:false,
 			form:{
-				account: 'mc2101',
-				pwd: '123456',
+				account: '18511835027',
+				pwd: '111111',
 			},
 			formRule:{
 				account: [{
@@ -64,43 +70,39 @@ export default {
 			checked: true
 		}
 	},
-	computed: {
-		...mapState([
-			'hasLogin',
-			'loginFailed',
-			'loginErrMsg'
-		])
-	},
-	watch:{
-		hasLogin(isLogin, old){
-			if(isLogin){
-				this.logining = false;
-				this.$router.push({
-					path: '/'
-				})
-			}
-		},
-
-		loginFailed(){
-			this.$message({
-				message: this.loginErrMsg || '登录失败，服务器出错！',
-				type: 'error'
-			})
-			this.logining = false;
-		}
-	},
 
 	methods: {
+
+		...mapMutations([
+			'RECORD_USERINFO'
+		]),
+
 		login(ev) {
-			this.$refs.form.validate(valid => {
-				if(valid){
-					this.logining = true;
-					this.$store.dispatch('login', {
-						account:this.form.account,
-						pwd: this.form.pwd
-					})
-				}
-			})
+
+			this.loading = true
+
+			setTimeout(() => {
+				this.$refs.form.validate(async valid => {
+					if (valid) {
+						var result = await login(this.form.account, this.form.pwd, 'mashDeveloper')
+
+						this.loading = false;
+
+
+						if (result.success) {
+							this.RECORD_USERINFO(result.object)
+							this.$router.push({
+								path: '/'
+							})
+						} else {
+							this.$message({
+								message: result.message,
+								type: 'warning'
+							})
+						}
+					}
+				})
+			}, 2000)
 		}
 	}
 }

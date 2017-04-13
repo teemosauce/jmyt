@@ -104,7 +104,7 @@
 </template>
 
 <script>
-	import ct from '../../api/customtable'
+	import * as api from '../../api/feed'
 
 	export default {
 		name: 'All',
@@ -217,14 +217,18 @@
 					this.currentPage = val;
 				}
 				this.loading = true;
-				ct.query({
+				api.queryFeedsByTable({
 					'query.type': '1001',
-					'query.tableName': 'UserDefined'
+					tableName: 'UserDefined'
 				}, this.currentPage, this.pageSize).then(res => {
 					this.result = res.object;
 					this.pageTotal = res.pageInfo.total;
 					this.loading = false;
 				}, err => {
+					this.loading = false;
+					this.$message({
+						
+					})
 					console.log(err)
 				})
 			},

@@ -43,7 +43,7 @@ Vue.config.productionTip = false
 router.beforeEach((to, from, next) => {
   const loginPath = '/login'
 
-  if(store.state.hasLogin){
+  if(store.state.login){
     
     if(to.path === loginPath){
        next({path:'/'})

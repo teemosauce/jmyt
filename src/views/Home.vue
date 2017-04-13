@@ -1,5 +1,5 @@
 <template>
-	<el-row class="container">
+	<el-row class="container" v-loading="loading"  element-loading-text="正在注销账号...">
 		
 		<el-col :span="24" class="header">
 			<el-col :span="10" class="logo" :class="collapsed&&'logo-collapse-width'||'logo-width'">
@@ -76,11 +76,16 @@
 	</el-row>
 </template>
 
-<script>
+<script> 
+	// import api from '../api'
+	
+	import * as api from '../api/user'
+
 	export default {
 		name : 'Home',
 		data(){
 			return {
+				loading: false,
 				collapsed:false,
 				sysName: '军民一体',
 				userName: '李彦朋',
@@ -97,11 +102,18 @@
 				this.collapsed=!this.collapsed;
 			},
 
-			logout(){
-				this.$store.commit('LOGOUT');
-				this.$router.push({
-					path: '/login'
-				})
+			async logout(){
+				this.loading = true;
+				var result = await api.logout();
+				console.log(result)
+				if(result.success){
+					this.$router.go(-1)
+				}else{
+					this.$message({
+						message: result.message,
+						type: 'warning'
+					})
+				}
 			},
 
 			handleOpen(){

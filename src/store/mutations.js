@@ -2,6 +2,7 @@ import * as types from './mutation-types'
 import session from '../cache/session'
 
 export default {
+
 	[types.LOGIN_SUCCESS](state, {
 		uid,
 		uname,
@@ -21,5 +22,18 @@ export default {
 	[types.LOGOUT](state) {
 		state.hasLogin = false;
 		session.del()
+	},
+
+	[types.RECORD_USERINFO](state, info) {
+		state.userInfo = info;
+		state.login = true;
+		let validity = 30;
+		let now = new Date();
+
+		now.setTime(now + validity * 24 * 60 * 60 * 1000);
+
+		document.cookie = `USERID=${info.userId};expires=${now.toGMTString()}`;
+		document.cookie = `SID=${info.sessionId};expires=${now.toGMTString()}`;
 	}
+
 }

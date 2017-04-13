@@ -11,9 +11,8 @@ Vue.use(VueX)
 
 export default new VueX.Store({
 	state: {
-		hasLogin: !!session.getId(),
-		loginFailed: 0,
-		loginErrMsg: '',
+		login: false,
+		userInfo: null,
 	},
 	actions,
 	mutations

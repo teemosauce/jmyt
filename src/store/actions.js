@@ -1,4 +1,4 @@
-import User from '../api/user'
+/*import User from '../api/user'
 
 export const login = ({
 	commit
@@ -18,4 +18,4 @@ export const login = ({
 			commit('LOGIN_FAILED', r.message)
 		}
 	})
-}
+}*/
