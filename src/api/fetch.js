@@ -8,7 +8,9 @@ export const HTTP_TYPE = {
 
 export default async(type = 'GET', url = '', data = {}, method = 'fetch') => {
 	type = type.toUpperCase()
-	url = baseUrl + url
+	if(!/^http:\/\/|^https:\/\//.test(url)){
+		url = baseUrl + url
+	}
 	
 	let dataStr = Object.keys(data).map(key => {
 		return key + '=' + data[key]
@@ -20,9 +22,7 @@ export default async(type = 'GET', url = '', data = {}, method = 'fetch') => {
 		}
 	}
 
-
-	if (1 ==2 && window.fetch && method == 'fetch') {
-
+	if (window.fetch && method == 'fetch') {
 		let requestConfig = {
 			// credentials: 'include',
 			method: type,
@@ -30,7 +30,7 @@ export default async(type = 'GET', url = '', data = {}, method = 'fetch') => {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			},
 			mode: "cors",
-			// cache: "force-cache"
+			cache: "force-cache"
 		}
 
 		if (dataStr && typeof dataStr === 'string') {
@@ -45,8 +45,8 @@ export default async(type = 'GET', url = '', data = {}, method = 'fetch') => {
 		} catch (e) {
 			throw new Error(e)
 		}
-
-		return response;
+		
+		return responseJson;
 	} else {
 		return new Promise(function(resolve, reject) {
 
