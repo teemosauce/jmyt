@@ -12,7 +12,7 @@
 			</el-col>
 			<el-col :span="4" class="userinfo">
 				<el-dropdown trigger="hover">
-					<span class="el-dropdown-link userinfo-inner"><img :src="this.userAvatar" /> {{userName}}</span>
+					<span class="el-dropdown-link userinfo-inner"><img :src="this.userAvatar" /> {{userInfo && userInfo.name}}</span>
 					<el-dropdown-menu slot="dropdown">
 						<el-dropdown-item>我的消息</el-dropdown-item>
 						<el-dropdown-item>设置</el-dropdown-item>
@@ -28,7 +28,7 @@
 					<template v-for="(item, index) in $router.options.routes" v-if="!item.hidden">
 						<el-submenu :index="index + ''" v-if="!item.leaf">
 							<template slot="title">
-								<i :class="item.iconFont">{{item.name}}</i>
+								<i :class="item.iconFont"><span style="padding-left: 10px;">{{item.name}}</span></i>
 							</template>
 							<el-menu-item v-for="(child, i) in item.children" :key="index +'-'+ i":index="child.path" v-if="!child.hidden">{{child.name}}</el-menu-item>
 						</el-submenu>
@@ -79,7 +79,9 @@
 <script> 
 	// import api from '../api'
 	
-	import * as api from '../api/user'
+	import { getUser, logout} from '../api/user'
+
+	import { mapMutations, mapState } from 'vuex'
 
 	export default {
 		name : 'Home',
@@ -88,32 +90,30 @@
 				loading: false,
 				collapsed:false,
 				sysName: '军民一体',
-				userName: '李彦朋',
-				userAvatar: ''
+				userName: '',
+				userAvatar: '',
 			}
 		},
 
-		beforeCreate(){
-			// console.log(this.$route)
-		},
+		computed: mapState(['userInfo']),
 
 		methods:{
+			...mapMutations([
+				'CLEAR_USERINFO'
+			]),
+
 			collapse(){
 				this.collapsed=!this.collapsed;
 			},
 
 			async logout(){
 				this.loading = true;
-				var result = await api.logout();
-				console.log(result)
-				if(result.success){
-					this.$router.go(-1)
-				}else{
-					this.$message({
-						message: result.message,
-						type: 'warning'
-					})
-				}
+				await logout();
+				this.CLEAR_USERINFO();
+				this.loading = false;
+				this.$router.push({
+					path: '/login'
+				})
 			},
 
 			handleOpen(){

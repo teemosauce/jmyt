@@ -1,17 +1,19 @@
-let baseUrl = 'http://www.mash5.cn/mashWebServices/service/mash5/rest'
-
 export const HTTP_TYPE = {
 	GET: 'GET',
 	POST: 'POST',
 	PUT: 'PUT'
 }
 
-export default async(type = 'GET', url = '', data = {}, method = 'fetch') => {
+
+
+export default async (type = 'GET', url = '', data = {}, method = 'fetch') => {
 	type = type.toUpperCase()
-	if(!/^http:\/\/|^https:\/\//.test(url)){
-		url = baseUrl + url
-	}
 	
+	let session = sessionStorage.getItem('SID');
+	if (session && typeof session == 'string') {
+		data['user.sessionId'] = session;
+	}
+
 	let dataStr = Object.keys(data).map(key => {
 		return key + '=' + data[key]
 	}).join('&')
@@ -38,41 +40,63 @@ export default async(type = 'GET', url = '', data = {}, method = 'fetch') => {
 				requestConfig.body = dataStr
 			}
 		}
-
-		try {
-			var response = await fetch(url, requestConfig)
-			var responseJson = await response.json()
-		} catch (e) {
-			throw new Error(e)
-		}
 		
+		let response = await fetch(url, requestConfig)
+		let responseJson = {};
+		if (response.ok) {
+			try {
+				responseJson = await response.json()
+			} catch (e) {
+				responseJson = {
+					success: false,
+					message: e.toString()
+				}
+			}
+		} else {
+			responseJson = {
+				success: false,
+				message: response.status + ' ' + response.statusText
+			}
+		}
+	
 		return responseJson;
 	} else {
-		return new Promise(function(resolve, reject) {
+		return new Promise(function (resolve, reject) {
 
-			let requestObj;
+			let xhr;
 			if (window.XMLHttpRequest) {
-				requestObj = new XMLHttpRequest();
+				xhr = new XMLHttpRequest();
 			} else {
-				requestObj = new ActiveXObject;
+				xhr = new ActiveXObject;
 			}
 
-			requestObj.open(type, url, true);
-			requestObj.setRequestHeader('Content-type', "application/x-www-form-urlencoded");
-			requestObj.send(dataStr);
+			xhr.open(type, url, true);
+			xhr.setRequestHeader('Content-type', "application/x-www-form-urlencoded");
+			xhr.send(dataStr);
 
-			requestObj.onreadystatechange = () => {
-				if (requestObj.readyState == 4) {
-					if (requestObj.status == 200) {
-						let obj = requestObj.response
-						if (typeof obj !== 'object') {
-							obj = JSON.parse(obj);
+			xhr.onreadystatechange = () => {
+				let responseJson;
+				if (xhr.readyState == 4) {
+					if (xhr.status == 200) {
+						responseJson = xhr.response
+						if (typeof responseJson !== 'object') {
+							try {
+								responseJson = JSON.parse(responseJson);
+							} catch (e) {
+								responseJson = {
+									success: false,
+									message: e.toString()
+								}
+							}
 						}
-						resolve(obj)
 					} else {
-						reject(requestObj);
-						throw new Error(requestObj)
+						responseJson = {
+							success: false,
+							message: xhr.status + ' ' + xhr.statusText
+						};
 					}
+
+					resolve(responseJson);
 				}
 			}
 		})

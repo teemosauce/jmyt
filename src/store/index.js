@@ -11,7 +11,7 @@ Vue.use(VueX)
 
 export default new VueX.Store({
 	state: {
-		login: false,
+		isLogin: !!sessionStorage.getItem('SID'),
 		userInfo: null,
 	},
 	actions,

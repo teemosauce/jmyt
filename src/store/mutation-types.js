@@ -9,3 +9,4 @@ export const LOGOUT = 'LOGOUT'
 export const HTTP_ERROR = 'HTTP_ERROR'
 
 export const RECORD_USERINFO = 'RECORD_USERINFO'
+export const CLEAR_USERINFO = 'CLEAR_USERINFO';

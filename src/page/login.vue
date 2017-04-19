@@ -36,11 +36,7 @@
 </template>
 
 <script>
-import  {mapState, mapMutations} from 'vuex';
-
-
-
-// import api from '../api'
+import  {mapMutations} from 'vuex';
 
 import { login } from '../api/user'
 
@@ -50,7 +46,7 @@ export default {
 		return {
 			loading:false,
 			form:{
-				account: '18511835027',
+				account: '13812774607',
 				pwd: '111111',
 			},
 			formRule:{
@@ -74,35 +70,30 @@ export default {
 	methods: {
 
 		...mapMutations([
-			'RECORD_USERINFO'
+			'LOGIN_SUCCESS'
 		]),
 
 		login(ev) {
 
 			this.loading = true
 
-			setTimeout(() => {
-				this.$refs.form.validate(async valid => {
-					if (valid) {
-						var result = await login(this.form.account, this.form.pwd, 'mashDeveloper')
-
-						this.loading = false;
-
-
-						if (result.success) {
-							this.RECORD_USERINFO(result.object)
-							this.$router.push({
-								path: '/'
-							})
-						} else {
-							this.$message({
-								message: result.message,
-								type: 'warning'
-							})
-						}
+			this.$refs.form.validate(async valid => {
+				if (valid) {
+					let result = await login(this.form.account, this.form.pwd, 'mro')
+					if (result.success) {
+						this.LOGIN_SUCCESS(result.object);
+						this.$router.push({
+							path: '/'
+						})
+					} else {
+						this.$message({
+							message: result.message,
+							type: 'warning'
+						})
 					}
-				})
-			}, 2000)
+					this.loading = false;
+				}
+			})
 		}
 	}
 }

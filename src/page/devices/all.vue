@@ -12,7 +12,7 @@
 				</el-select>
 			</el-col>
 			<el-col :span="8">
-				<el-input v-model="searchInput" placeholder="请输入内容"></el-input>
+				<el-input v-model="searchValue" placeholder="请输入内容"></el-input>
 			</el-col>
 			<el-col :span="4">
 				<el-button type="primary" @click="search">搜 索</el-button>
@@ -104,7 +104,7 @@
 </template>
 
 <script>
-	import * as api from '../../api/feed'
+	import {queryFeedsByTable} from '../../api/feed'
 
 	export default {
 		name: 'All',
@@ -167,7 +167,7 @@
 					canSearch: true,
 				}],
 				searchKey: '',
-				searchInput: '',
+				searchValue: '',
 				customColumnVisible: false,
 				checkAll: true,
 				checkedColumns: [],
@@ -181,8 +181,29 @@
 				return row.equipmentID + row.equipmentName
 			},
 
-			search() {
+			async search() {
+				this.currentPage = 1
+				this.loading = true;
+				let result = await queryFeedsByTable('UserDefined',this.currentPage, this.pageSize, {
+					eq : {
+						type: '1001'
+					},
 
+					like: {
+						[this.searchKey]: this.searchValue
+					}
+				});
+				this.loading = false;
+
+				if(result.success){
+					this.result = result.object;
+					this.pageTotal = result.pageInfo.total;
+				}else{
+					this.$message({
+						message: result.message,
+						type: 'warning'
+					})
+				}
 			},
 
 			renderList(){
@@ -212,25 +233,28 @@
 				this.multipleSelection = val;
 			},
 
-			handleCurrentChange(val) {
+			async handleCurrentChange(val) {
 				if (val) {
 					this.currentPage = val;
 				}
 				this.loading = true;
-				api.queryFeedsByTable({
-					'query.type': '1001',
-					tableName: 'UserDefined'
-				}, this.currentPage, this.pageSize).then(res => {
-					this.result = res.object;
-					this.pageTotal = res.pageInfo.total;
-					this.loading = false;
-				}, err => {
-					this.loading = false;
+				let result = await queryFeedsByTable('UserDefined',this.currentPage, this.pageSize, {
+					eq : {
+						type: '1001'
+					}
+				});
+
+				this.loading = false;
+
+				if(result.success){
+					this.result = result.object;
+					this.pageTotal = result.pageInfo.total;
+				}else{
 					this.$message({
-						
+						message: result.message,
+						type: 'warning'
 					})
-					console.log(err)
-				})
+				}
 			},
 
 			handleSizeChange(size) {
